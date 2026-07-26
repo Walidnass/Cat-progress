@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#FBF3EC">
+<title>Cat Age Tracker</title>
+
+<!-- Google Fonts: Quicksand for display/numbers, Plus Jakarta Sans for body text -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app-container">
+
+  <header class="app-header">
+    <h1 class="app-title">🐾 Cat Age Tracker</h1>
+    <p class="app-subtitle">Their age, growth, and memories — all in one place.</p>
+  </header>
+
+  <!-- ============================================================
+       PROFILE SECTION
+       Two states share one card: the read-only display
+       (#profile-display) and the setup/edit form (#profile-form).
+       app.js toggles between them with the .hidden class.
+  ============================================================= -->
+  <section class="card profile-card">
+
+    <div id="profile-display" class="profile-display hidden">
+      <button id="edit-profile-btn" class="icon-btn edit-btn" type="button" aria-label="Edit profile">✏️</button>
+
+      <div class="avatar-wrap">
+        <img id="avatar-img" class="avatar-img hidden" alt="">
+        <div id="avatar-placeholder" class="avatar-placeholder">🐾</div>
+      </div>
+
+      <h2 id="cat-name-display" class="cat-name"></h2>
+      <p id="cat-breed-display" class="cat-breed hidden"></p>
+      <span id="life-stage-badge" class="life-stage-badge"></span>
+
+      <!-- Signature moment: these three numbers count up whenever the age changes (see animateNumber in app.js) -->
+      <div class="age-display">
+        <div class="age-stat">
+          <span id="age-years" class="age-number">0</span>
+          <span class="age-label">Years</span>
+        </div>
+        <div class="age-stat">
+          <span id="age-months" class="age-number">0</span>
+          <span class="age-label">Months</span>
+        </div>
+        <div class="age-stat">
+          <span id="age-days" class="age-number">0</span>
+          <span class="age-label">Days</span>
+        </div>
+      </div>
+
+      <p id="reference-date-note" class="reference-note"></p>
+    </div>
+
+    <form id="profile-form" class="profile-form">
+      <h2 class="form-title">Tell us about your cat</h2>
+
+      <div class="avatar-upload-wrap">
+        <label for="avatar-input" class="avatar-upload-label">
+          <img id="avatar-preview" class="avatar-preview hidden" alt="">
+          <span class="avatar-upload-overlay">📷 Photo</span>
+        </label>
+        <input type="file" id="avatar-input" accept="image/*" hidden>
+      </div>
+
+      <div class="form-group">
+        <label for="cat-name-input">Name</label>
+        <input type="text" id="cat-name-input" placeholder="e.g. Frita" required>
+      </div>
+
+      <div class="form-group">
+        <label for="cat-date-input">Birthdate or adoption date</label>
+        <input type="date" id="cat-date-input" required>
+      </div>
+
+      <div class="form-group">
+        <span class="form-sublabel">This date is their</span>
+        <div class="segmented-control" id="date-type-toggle">
+          <button type="button" class="segment active" data-value="birth">Birthdate</button>
+          <button type="button" class="segment" data-value="adoption">Adoption day</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="cat-breed-input">Breed <span class="optional-tag">optional</span></label>
+        <input type="text" id="cat-breed-input" placeholder="e.g. Domestic shorthair">
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Save profile</button>
+        <button type="button" id="cancel-edit-btn" class="btn btn-ghost hidden">Cancel</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- ============================================================
+       WEIGHT TREND (bonus feature)
+       Hidden by app.js until there are at least 2 weigh-ins.
+  ============================================================= -->
+  <section id="weight-section" class="card weight-card hidden">
+    <h3 class="section-title">⚖️ Weight trend</h3>
+    <svg id="weight-chart" class="weight-chart" viewBox="0 0 300 100" preserveAspectRatio="none"></svg>
+    <p id="weight-latest" class="weight-latest"></p>
+  </section>
+
+  <!-- ============================================================
+       PHOTO TIMELINE
+       Hidden by app.js until a profile exists (age-on-date needs
+       a reference date to calculate against).
+  ============================================================= -->
+  <section id="log-card" class="card log-card hidden">
+    <div class="log-header">
+      <h3 class="section-title">📸 Photo timeline</h3>
+      <div class="segmented-control" id="mode-toggle">
+        <button type="button" class="segment" data-value="daily">Daily</button>
+        <button type="button" class="segment active" data-value="weekly">Weekly</button>
+      </div>
+    </div>
+    <p id="mode-hint" class="mode-hint">Add a photo each week to watch them grow over time.</p>
+
+    <form id="upload-form" class="upload-form">
+      <!-- Clicking or dropping on this label opens the file picker (native <label for>) -->
+      <label for="photo-input" id="drop-zone" class="drop-zone">
+        <div id="drop-zone-empty" class="drop-zone-empty">
+          <span class="drop-icon">🖼️</span>
+          <span>Click or drag a photo here</span>
+        </div>
+        <img id="photo-preview" class="photo-preview hidden" alt="">
+      </label>
+      <input type="file" id="photo-input" accept="image/*" hidden>
+
+      <div id="upload-fields" class="upload-fields fade-in hidden">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="entry-date-input">Date</label>
+            <input type="date" id="entry-date-input">
+          </div>
+          <div class="form-group">
+            <label for="entry-weight-input">Weight (kg) <span class="optional-tag">optional</span></label>
+            <input type="number" id="entry-weight-input" step="0.01" min="0" placeholder="4.2">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="entry-caption-input">Caption <span class="optional-tag">optional</span></label>
+          <input type="text" id="entry-caption-input" maxlength="120" placeholder="A little note about this moment...">
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Add to timeline</button>
+          <button type="button" id="cancel-upload-btn" class="btn btn-ghost">Cancel</button>
+        </div>
+      </div>
+    </form>
+
+    <div id="timeline-empty" class="timeline-empty">
+      <span class="empty-icon">🐾</span>
+      <p>No memories yet — add your first photo above.</p>
+    </div>
+    <div id="timeline-feed" class="timeline-feed"></div>
+  </section>
+
+  <footer class="app-footer">
+    <button id="reset-data-btn" class="text-btn" type="button">Clear all data</button>
+  </footer>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<!-- storage.js must load before app.js — app.js calls the Storage object it defines -->
+<script src="storage.js" defer></script>
+<script src="app.js" defer></script>
+</body>
+</html>
